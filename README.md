@@ -95,6 +95,76 @@ Configure the application properties in `src/main/java/org/raman/resources/globa
 3. Run the application
 4. Check your email for failure notifications (if any APIs fail)
 
+## Deployment
+
+### Creating a JAR File
+
+Build the executable JAR using Maven:
+
+```bash
+mvn clean package
+```
+
+This will create a JAR file in the `target/` directory.
+
+### Setting up Cron Job
+
+1. **Copy the JAR** to your deployment location
+2. **Create a shell script** (optional but recommended):
+
+```bash
+#!/bin/bash
+cd /path/to/your/application
+java -jar target/api-monitoring-1.0-SNAPSHOT.jar
+```
+
+3. **Add to crontab**:
+
+```bash
+crontab -e
+```
+
+4. **Schedule the monitoring** (examples):
+
+```bash
+# Run every 30 minutes
+*/30 * * * * /path/to/your/script.sh
+
+# Run every hour at minute 0
+0 * * * * /path/to/your/script.sh
+
+# Run every weekday at 9 AM
+0 9 * * 1-5 /path/to/your/script.sh
+```
+
+### Production Considerations
+
+- **Logging**: Ensure log4j2.xml is configured for production logs
+- **Error handling**: Monitor logs for any runtime errors
+- **Resource limits**: Set appropriate memory limits for the JVM
+- **Backup**: Keep backups of your Excel API configuration file
+- **Email reliability**: Test email delivery from your production environment
+
+### Systemd Service (Alternative to Cron)
+
+For more robust process management, consider creating a systemd service:
+
+```ini
+[Unit]
+Description=API Monitoring Service
+After=network.target
+
+[Service]
+User=your-user
+WorkingDirectory=/path/to/your/application
+ExecStart=/usr/bin/java -jar target/api-monitoring-1.0-SNAPSHOT.jar
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ## License
 
 This project is licensed under the Apache License 2.0.
